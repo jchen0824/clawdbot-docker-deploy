@@ -20,7 +20,7 @@ cp .env.example .env
 
 Required:
 - `TELEGRAM_BOT_TOKEN`
-- `TELEGRAM_OWNER_ID`
+- `TELEGRAM_ALLOW_FROM` (preferred) **or** `TELEGRAM_OWNER_ID` (back-compat)
 - `LITELLM_BASE_URL` (e.g. `http://host.docker.internal:4000`)
 - `LITELLM_API_KEY`
 

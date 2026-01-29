@@ -28,7 +28,12 @@ echo "[init] configure telegram allowlist"
 "${CLI[@]}" config set channels.telegram.enabled true
 "${CLI[@]}" config set channels.telegram.botToken "$TELEGRAM_BOT_TOKEN"
 "${CLI[@]}" config set channels.telegram.dmPolicy allowlist
-"${CLI[@]}" config set --json channels.telegram.allowFrom "[\"$TELEGRAM_OWNER_ID\"]"
+
+# Allowlist can be set as JSON array string, e.g.:
+# TELEGRAM_ALLOW_FROM='["1459204134","123456789"]'
+# Back-compat: if TELEGRAM_ALLOW_FROM not set, fall back to TELEGRAM_OWNER_ID.
+ALLOW_FROM_JSON=${TELEGRAM_ALLOW_FROM:-"[\"$TELEGRAM_OWNER_ID\"]"}
+"${CLI[@]}" config set --json channels.telegram.allowFrom "$ALLOW_FROM_JSON"
 
 echo "[init] configure control ui (allow token auth over http on localhost/lan)"
 "${CLI[@]}" config set gateway.controlUi.allowInsecureAuth true

@@ -12,12 +12,11 @@ services:
       - CLAWDBOT_GATEWAY_TOKEN=${GATEWAY_AUTH_TOKEN}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - TELEGRAM_OWNER_ID=${TELEGRAM_OWNER_ID}
+      - TELEGRAM_ALLOW_FROM=${TELEGRAM_ALLOW_FROM}
       - LITELLM_BASE_URL=${LITELLM_BASE_URL}
       - LITELLM_API_KEY=${LITELLM_API_KEY}
     volumes:
-      # Persist config on the host (do not commit)
       - ${CLAWDBOT_CONFIG_DIR:-./data}:/home/node/.clawdbot
-      # Persist workspace on the host (optional, but recommended)
       - ${CLAWDBOT_WORKSPACE_DIR:-./workspace}:/home/node/clawd
       - ./init.sh:/workspace-init/init.sh:ro
     extra_hosts:
@@ -40,6 +39,8 @@ services:
       - CLAWDBOT_STATE_DIR=/home/node/.clawdbot
       - CLAWDBOT_GATEWAY_TOKEN=${GATEWAY_AUTH_TOKEN}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_OWNER_ID=${TELEGRAM_OWNER_ID}
+      - TELEGRAM_ALLOW_FROM=${TELEGRAM_ALLOW_FROM}
       - LITELLM_BASE_URL=${LITELLM_BASE_URL}
       - LITELLM_API_KEY=${LITELLM_API_KEY}
     volumes:
