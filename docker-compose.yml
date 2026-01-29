@@ -1,51 +1,53 @@
 services:
-  clawdbot:
-    image: node:22-alpine
-    container_name: clawdbot-gateway
-    restart: unless-stopped
+  moltbot-init:
+    image: moltbot/moltbot:latest
+    platform: linux/amd64
+    container_name: clawdbot-init
+    user: root
     working_dir: /app
     environment:
-      - NODE_ENV=production
-      - CLAWDBOT_STATE_DIR=/data/.clawdbot
-      - HOME=/data
-      # Secrets loaded from .env file
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - HOME=/home/node
+      - XDG_CONFIG_HOME=/home/node/.clawdbot
+      - CLAWDBOT_STATE_DIR=/home/node/.clawdbot
+      - CLAWDBOT_GATEWAY_TOKEN=${GATEWAY_AUTH_TOKEN}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY}
-      - GH_TOKEN=${GH_TOKEN:-}
-      - BRAVE_API_KEY=${BRAVE_API_KEY:-}
+      - TELEGRAM_OWNER_ID=${TELEGRAM_OWNER_ID}
+      - LITELLM_BASE_URL=${LITELLM_BASE_URL}
+      - LITELLM_API_KEY=${LITELLM_API_KEY}
     volumes:
-      # Persistent state
-      - clawdbot-data:/data
-      # Workspace
-      - clawdbot-workspace:/workspace
-      # Docker socket for sandbox mode (read-only)
+      # Persist config on the host (do not commit)
+      - ${CLAWDBOT_CONFIG_DIR:-./data}:/home/node/.clawdbot
+      # Persist workspace on the host (optional, but recommended)
+      - ${CLAWDBOT_WORKSPACE_DIR:-./workspace}:/home/node/clawd
+      - ./init.sh:/workspace-init/init.sh:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: ["bash", "/workspace-init/init.sh"]
+    restart: "no"
+
+  clawdbot:
+    image: moltbot/moltbot:latest
+    platform: linux/amd64
+    container_name: clawdbot-gateway
+    working_dir: /app
+    restart: unless-stopped
+    depends_on:
+      moltbot-init:
+        condition: service_completed_successfully
+    environment:
+      - HOME=/home/node
+      - XDG_CONFIG_HOME=/home/node/.clawdbot
+      - CLAWDBOT_STATE_DIR=/home/node/.clawdbot
+      - CLAWDBOT_GATEWAY_TOKEN=${GATEWAY_AUTH_TOKEN}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - LITELLM_BASE_URL=${LITELLM_BASE_URL}
+      - LITELLM_API_KEY=${LITELLM_API_KEY}
+    volumes:
+      - ${CLAWDBOT_CONFIG_DIR:-./data}:/home/node/.clawdbot
+      - ${CLAWDBOT_WORKSPACE_DIR:-./workspace}:/home/node/clawd
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
-      - "${GATEWAY_PORT:-18789}:18789"
-    networks:
-      - clawdbot-network
-    command: >
-      sh -c "
-        echo '>>> Installing Clawdbot...' &&
-        npm install -g clawdbot@latest &&
-        echo '>>> Starting Clawdbot Gateway...' &&
-        clawdbot gateway start
-      "
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:18789/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
-networks:
-  clawdbot-network:
-    driver: bridge
-
-volumes:
-  clawdbot-data:
-    driver: local
-  clawdbot-workspace:
-    driver: local
+      - "${GATEWAY_PORT:-18790}:18789"
+    command: ["node", "dist/index.js", "gateway", "run", "--bind", "lan", "--port", "18789", "--token", "${GATEWAY_AUTH_TOKEN}"]
