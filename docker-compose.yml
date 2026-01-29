@@ -1,0 +1,51 @@
+services:
+  clawdbot:
+    image: node:22-alpine
+    container_name: clawdbot-gateway
+    restart: unless-stopped
+    working_dir: /app
+    environment:
+      - NODE_ENV=production
+      - CLAWDBOT_STATE_DIR=/data/.clawdbot
+      - HOME=/data
+      # Secrets loaded from .env file
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY}
+      - GH_TOKEN=${GH_TOKEN:-}
+      - BRAVE_API_KEY=${BRAVE_API_KEY:-}
+    volumes:
+      # Persistent state
+      - clawdbot-data:/data
+      # Workspace
+      - clawdbot-workspace:/workspace
+      # Docker socket for sandbox mode (read-only)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - "${GATEWAY_PORT:-18789}:18789"
+    networks:
+      - clawdbot-network
+    command: >
+      sh -c "
+        echo '>>> Installing Clawdbot...' &&
+        npm install -g clawdbot@latest &&
+        echo '>>> Starting Clawdbot Gateway...' &&
+        clawdbot gateway start
+      "
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:18789/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+networks:
+  clawdbot-network:
+    driver: bridge
+
+volumes:
+  clawdbot-data:
+    driver: local
+  clawdbot-workspace:
+    driver: local
