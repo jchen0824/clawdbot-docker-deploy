@@ -24,6 +24,9 @@ Required:
 - `LITELLM_BASE_URL` (e.g. `http://host.docker.internal:4000`)
 - `LITELLM_API_KEY`
 
+Optional:
+- `BRAVE_API_KEY` (enables `web_search` via Brave)
+
 Recommended:
 - `GATEWAY_AUTH_TOKEN` (generate once: `openssl rand -hex 32`)
 

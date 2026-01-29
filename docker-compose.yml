@@ -15,6 +15,7 @@ services:
       - TELEGRAM_ALLOW_FROM=${TELEGRAM_ALLOW_FROM}
       - LITELLM_BASE_URL=${LITELLM_BASE_URL}
       - LITELLM_API_KEY=${LITELLM_API_KEY}
+      - BRAVE_API_KEY=${BRAVE_API_KEY}
     volumes:
       - ${CLAWDBOT_CONFIG_DIR:-./data}:/home/node/.clawdbot
       - ${CLAWDBOT_WORKSPACE_DIR:-./workspace}:/home/node/clawd
@@ -43,6 +44,7 @@ services:
       - TELEGRAM_ALLOW_FROM=${TELEGRAM_ALLOW_FROM}
       - LITELLM_BASE_URL=${LITELLM_BASE_URL}
       - LITELLM_API_KEY=${LITELLM_API_KEY}
+      - BRAVE_API_KEY=${BRAVE_API_KEY}
     volumes:
       - ${CLAWDBOT_CONFIG_DIR:-./data}:/home/node/.clawdbot
       - ${CLAWDBOT_WORKSPACE_DIR:-./workspace}:/home/node/clawd

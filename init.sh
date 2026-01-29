@@ -24,6 +24,9 @@ echo "[init] onboarding (non-interactive)"
   --gateway-token "$CLAWDBOT_GATEWAY_TOKEN" \
   --skip-daemon --skip-ui --skip-skills --skip-health
 
+echo "[init] set session dm scope"
+"${CLI[@]}" config set session.dmScope per-channel-peer
+
 echo "[init] configure telegram allowlist"
 "${CLI[@]}" config set channels.telegram.enabled true
 "${CLI[@]}" config set channels.telegram.botToken "$TELEGRAM_BOT_TOKEN"
@@ -37,6 +40,16 @@ ALLOW_FROM_JSON=${TELEGRAM_ALLOW_FROM:-"[\"$TELEGRAM_OWNER_ID\"]"}
 
 echo "[init] configure control ui (allow token auth over http on localhost/lan)"
 "${CLI[@]}" config set gateway.controlUi.allowInsecureAuth true
+
+echo "[init] configure web_search (Brave)"
+# Prefer storing the key in config (tools.web.search.apiKey). This also works if you later remove BRAVE_API_KEY from env.
+if [ -n "${BRAVE_API_KEY:-}" ]; then
+  "${CLI[@]}" config set tools.web.search.enabled true
+  "${CLI[@]}" config set tools.web.search.provider brave
+  "${CLI[@]}" config set tools.web.search.apiKey "$BRAVE_API_KEY"
+else
+  echo "[init] BRAVE_API_KEY not set; skipping web_search setup"
+fi
 
 echo "[init] configure LiteLLM providers"
 
