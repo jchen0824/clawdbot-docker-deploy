@@ -1,0 +1,28 @@
+hcloud_token      = "HCLOUD_TOKEN_HERE"
+ssh_key_name      = "your-hetzner-ssh-key-name"
+server_name       = "clawdbot-bot"
+location          = "fsn1"  # or sgp1, hel1
+server_type       = "cx22"
+image             = "ubuntu-24.04"
+
+# IMPORTANT: repo must be reachable from the VPS.
+# Use a public HTTPS repo URL, or bake your own bootstrap that fetches an archive.
+repo_url          = "https://github.com/YOURORG/clawdbot-docker-deploy.git"
+repo_branch       = "main"
+
+gateway_port       = 18789
+gateway_auth_token = "$(openssl rand -hex 32)"
+
+telegram_bot_token  = "123:abc"
+telegram_allow_from = "[\"1459204134\"]"
+
+# Choose one:
+# 1) Direct Anthropic
+anthropic_api_key = "sk-ant-..."
+
+# 2) Or LiteLLM (optional)
+# litellm_base_url = "http://127.0.0.1:4000" # if LiteLLM runs on same VPS
+# litellm_api_key  = "sk-..."
+
+# Optional
+# brave_api_key = "BSA..."

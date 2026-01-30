@@ -21,8 +21,11 @@ if [ -z "${TELEGRAM_ALLOW_FROM:-}" ] && [ -z "${TELEGRAM_OWNER_ID:-}" ]; then
   echo "Missing TELEGRAM_ALLOW_FROM (preferred) or TELEGRAM_OWNER_ID (back-compat) in .env" >&2
   exit 1
 fi
-: "${LITELLM_BASE_URL:?Missing LITELLM_BASE_URL in .env}"
-: "${LITELLM_API_KEY:?Missing LITELLM_API_KEY in .env}"
+# Require either direct Anthropic key OR LiteLLM config
+if [ -z "${ANTHROPIC_API_KEY:-}" ] && { [ -z "${LITELLM_BASE_URL:-}" ] || [ -z "${LITELLM_API_KEY:-}" ]; }; then
+  echo "Missing model provider config. Set ANTHROPIC_API_KEY (recommended) or LITELLM_BASE_URL+LITELLM_API_KEY in .env" >&2
+  exit 1
+fi
 : "${GATEWAY_AUTH_TOKEN:?Missing GATEWAY_AUTH_TOKEN in .env}"
 
 mkdir -p "${CLAWDBOT_CONFIG_DIR:-./data}" "${CLAWDBOT_WORKSPACE_DIR:-./workspace}"

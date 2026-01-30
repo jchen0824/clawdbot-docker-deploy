@@ -51,23 +51,30 @@ else
   echo "[init] BRAVE_API_KEY not set; skipping web_search setup"
 fi
 
-echo "[init] configure LiteLLM providers"
+echo "[init] configure model providers"
+
+# Two supported modes:
+# 1) Direct Anthropic (recommended for simple onboarding): ANTHROPIC_API_KEY
+# 2) LiteLLM proxy (optional): LITELLM_BASE_URL + LITELLM_API_KEY
+
 
 OPENAI_MODELS='[
-  {"id":"claude-opus-4-5","name":"Claude Opus 4.5 (via LiteLLM)"},
-  {"id":"claude-sonnet-4-5","name":"Claude Sonnet 4.5 (via LiteLLM)"},
-  {"id":"chatgpt/gpt-5.2","name":"ChatGPT GPT-5.2 (via LiteLLM)"}
+  {"id":"claude-opus-4-5","name":"Claude Opus 4.5"},
+  {"id":"claude-sonnet-4-5","name":"Claude Sonnet 4.5"}
 ]'
 
 ANTHROPIC_MODELS='[
-  {"id":"claude-sonnet-4-5","name":"Claude Sonnet 4.5 (via LiteLLM passthrough)"},
-  {"id":"claude-opus-4-5","name":"Claude Opus 4.5 (via LiteLLM passthrough)"}
+  {"id":"claude-sonnet-4-5","name":"Claude Sonnet 4.5"},
+  {"id":"claude-opus-4-5","name":"Claude Opus 4.5"}
 ]'
 
-# IMPORTANT: provider configs are schema-validated as a unit. Set the provider objects in one go.
+# IMPORTANT: provider configs are schema-validated as a unit. Set provider objects in one go.
 "${CLI[@]}" config set models.mode merge
 
-OPENAI_PROVIDER=$(cat <<JSON
+if [ -n "${LITELLM_BASE_URL:-}" ] && [ -n "${LITELLM_API_KEY:-}" ]; then
+  echo "[init] using LiteLLM for model providers"
+
+  OPENAI_PROVIDER=$(cat <<JSON
 {
   "api": "openai-completions",
   "baseUrl": "${LITELLM_BASE_URL%/}/v1",
@@ -77,7 +84,7 @@ OPENAI_PROVIDER=$(cat <<JSON
 JSON
 )
 
-ANTHROPIC_PROVIDER=$(cat <<JSON
+  ANTHROPIC_PROVIDER=$(cat <<JSON
 {
   "api": "anthropic-messages",
   "baseUrl": "${LITELLM_BASE_URL%/}/anthropic",
@@ -87,8 +94,28 @@ ANTHROPIC_PROVIDER=$(cat <<JSON
 JSON
 )
 
-"${CLI[@]}" config set --json models.providers.openai "$OPENAI_PROVIDER"
-"${CLI[@]}" config set --json models.providers.anthropic "$ANTHROPIC_PROVIDER"
+  "${CLI[@]}" config set --json models.providers.openai "$OPENAI_PROVIDER"
+  "${CLI[@]}" config set --json models.providers.anthropic "$ANTHROPIC_PROVIDER"
+
+elif [ -n "${ANTHROPIC_API_KEY:-}" ]; then
+  echo "[init] using direct Anthropic API"
+
+  ANTHROPIC_PROVIDER=$(cat <<JSON
+{
+  "api": "anthropic-messages",
+  "baseUrl": "https://api.anthropic.com",
+  "apiKey": "${ANTHROPIC_API_KEY}",
+  "models": ${ANTHROPIC_MODELS}
+}
+JSON
+)
+
+  "${CLI[@]}" config set --json models.providers.anthropic "$ANTHROPIC_PROVIDER"
+
+else
+  echo "[init] ERROR: No model provider configured. Set ANTHROPIC_API_KEY (recommended) or LITELLM_BASE_URL+LITELLM_API_KEY." >&2
+  exit 1
+fi
 
 echo "[init] set default model"
 "${CLI[@]}" config set agents.defaults.model.primary anthropic/claude-sonnet-4-5
