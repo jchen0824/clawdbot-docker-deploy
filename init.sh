@@ -59,13 +59,13 @@ echo "[init] configure model providers"
 
 
 OPENAI_MODELS='[
-  {"id":"claude-opus-4-5","name":"Claude Opus 4.5"},
-  {"id":"claude-sonnet-4-5","name":"Claude Sonnet 4.5"}
+  {"id":"claude-opus-4-5","name":"Claude Opus 4.5","reasoning":false},
+  {"id":"claude-sonnet-4-5","name":"Claude Sonnet 4.5","reasoning":false}
 ]'
 
 ANTHROPIC_MODELS='[
-  {"id":"claude-sonnet-4-5","name":"Claude Sonnet 4.5"},
-  {"id":"claude-opus-4-5","name":"Claude Opus 4.5"}
+  {"id":"claude-sonnet-4-5","name":"Claude Sonnet 4.5","reasoning":false},
+  {"id":"claude-opus-4-5","name":"Claude Opus 4.5","reasoning":false}
 ]'
 
 # IMPORTANT: provider configs are schema-validated as a unit. Set provider objects in one go.
