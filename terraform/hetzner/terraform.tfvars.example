@@ -7,8 +7,11 @@ image             = "ubuntu-24.04"
 
 # IMPORTANT: repo must be reachable from the VPS.
 # Use a public HTTPS repo URL, or bake your own bootstrap that fetches an archive.
-repo_url          = "https://github.com/YOURORG/clawdbot-docker-deploy.git"
+repo_url          = "https://github.com/jchen0824/clawdbot-docker-deploy.git"
 repo_branch       = "main"
+
+domain     = "cust-123.mydomain.com"
+caddy_email = "you@example.com"
 
 gateway_port       = 18789
 gateway_auth_token = "$(openssl rand -hex 32)"

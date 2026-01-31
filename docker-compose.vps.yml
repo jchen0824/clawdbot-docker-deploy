@@ -1,0 +1,70 @@
+services:
+  moltbot-init:
+    image: moltbot/moltbot:latest
+    platform: linux/amd64
+    container_name: clawdbot-init
+    user: root
+    working_dir: /app
+    environment:
+      - HOME=/home/node
+      - XDG_CONFIG_HOME=/home/node/.clawdbot
+      - CLAWDBOT_STATE_DIR=/home/node/.clawdbot
+      - CLAWDBOT_GATEWAY_TOKEN=${GATEWAY_AUTH_TOKEN}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_OWNER_ID=${TELEGRAM_OWNER_ID}
+      - TELEGRAM_ALLOW_FROM=${TELEGRAM_ALLOW_FROM}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - LITELLM_BASE_URL=${LITELLM_BASE_URL}
+      - LITELLM_API_KEY=${LITELLM_API_KEY}
+      - BRAVE_API_KEY=${BRAVE_API_KEY}
+    volumes:
+      - ${CLAWDBOT_CONFIG_DIR}:/home/node/.clawdbot
+      - ${CLAWDBOT_WORKSPACE_DIR}:/home/node/clawd
+      - ./init.sh:/workspace-init/init.sh:ro
+    command: ["bash", "/workspace-init/init.sh"]
+    restart: "no"
+
+  clawdbot:
+    image: moltbot/moltbot:latest
+    platform: linux/amd64
+    container_name: clawdbot-gateway
+    working_dir: /app
+    restart: unless-stopped
+    depends_on:
+      moltbot-init:
+        condition: service_completed_successfully
+    environment:
+      - HOME=/home/node
+      - XDG_CONFIG_HOME=/home/node/.clawdbot
+      - CLAWDBOT_STATE_DIR=/home/node/.clawdbot
+      - CLAWDBOT_GATEWAY_TOKEN=${GATEWAY_AUTH_TOKEN}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_OWNER_ID=${TELEGRAM_OWNER_ID}
+      - TELEGRAM_ALLOW_FROM=${TELEGRAM_ALLOW_FROM}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - LITELLM_BASE_URL=${LITELLM_BASE_URL}
+      - LITELLM_API_KEY=${LITELLM_API_KEY}
+      - BRAVE_API_KEY=${BRAVE_API_KEY}
+    volumes:
+      - ${CLAWDBOT_CONFIG_DIR}:/home/node/.clawdbot
+      - ${CLAWDBOT_WORKSPACE_DIR}:/home/node/clawd
+    # IMPORTANT: do not publish the gateway port. Caddy is the only public entrypoint.
+    command: ["node", "dist/index.js", "gateway", "run", "--bind", "loopback", "--port", "18789", "--token", "${GATEWAY_AUTH_TOKEN}"]
+
+  caddy:
+    image: caddy:2
+    container_name: clawdbot-caddy
+    restart: unless-stopped
+    depends_on:
+      - clawdbot
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:

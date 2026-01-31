@@ -32,7 +32,29 @@ resource "hcloud_server" "bot" {
     litellm_base_url    = var.litellm_base_url
     litellm_api_key     = var.litellm_api_key
     brave_api_key       = var.brave_api_key
+    domain              = var.domain
+    caddy_email         = var.caddy_email
   })
+
+  firewall_ids = [hcloud_firewall.web_only.id]
+}
+
+resource "hcloud_firewall" "web_only" {
+  name = "${var.server_name}-web-only"
+
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "80"
+    source_ips = ["0.0.0.0/0", "::/0"]
+  }
+
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "443"
+    source_ips = ["0.0.0.0/0", "::/0"]
+  }
 }
 
 output "server_ip" {

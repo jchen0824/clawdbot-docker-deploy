@@ -11,8 +11,9 @@ This folder provisions a Hetzner VPS + bootstraps a **single Telegram bot** runn
   - `/root/clawd`
 - Clones your deploy repo
 - Writes `.env`
-- Runs `docker compose up -d`
-- Keeps the gateway bound to **localhost** on the VPS (recommended). You access the Control UI via SSH tunnel.
+- Runs `docker compose -f docker-compose.vps.yml up -d`
+- Exposes the Control UI via **HTTPS only** using Caddy + Let's Encrypt
+- Inbound firewall allows **80/443 only** (no SSH)
 
 ## Prereqs
 

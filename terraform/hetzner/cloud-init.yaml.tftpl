@@ -37,4 +37,15 @@ runcmd:
   - rm -rf /opt/clawdbot-docker-deploy
   - git clone --depth 1 --branch ${repo_branch} ${repo_url} /opt/clawdbot-docker-deploy
   - cp -f /root/clawdbot.env /opt/clawdbot-docker-deploy/.env
-  - cd /opt/clawdbot-docker-deploy && docker compose up -d
+  - |
+    cat > /opt/clawdbot-docker-deploy/Caddyfile <<'EOF'
+    ${domain} {
+      # HTTPS via Let's Encrypt. Email is set via Caddy global options.
+      reverse_proxy clawdbot:18789
+    }
+
+    {
+      email ${caddy_email}
+    }
+    EOF
+  - cd /opt/clawdbot-docker-deploy && docker compose -f docker-compose.vps.yml up -d

@@ -28,6 +28,16 @@ variable "location" {
   default = "sgp1"
 }
 
+variable "domain" {
+  type        = string
+  description = "Public hostname for this bot, e.g. cust-123.mydomain.com"
+}
+
+variable "caddy_email" {
+  type        = string
+  description = "Email for Let's Encrypt (Caddy)."
+}
+
 variable "repo_url" {
   type        = string
   description = "Git URL of your clawdbot-docker-deploy repo (must be reachable from VPS)."
