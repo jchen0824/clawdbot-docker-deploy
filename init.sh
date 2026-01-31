@@ -27,9 +27,6 @@ echo "[init] onboarding (non-interactive)"
 echo "[init] remove invalid plugin configuration entirely (workaround for plugin errors)"
 "${CLI[@]}" config unset plugins || true
 
-echo "[init] run doctor --fix to resolve any configuration issues"
-"${CLI[@]}" doctor --fix || true
-
 echo "[init] set session dm scope"
 "${CLI[@]}" config set session.dmScope per-channel-peer
 
