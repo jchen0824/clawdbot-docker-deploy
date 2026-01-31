@@ -24,8 +24,14 @@ echo "[init] onboarding (non-interactive)"
   --gateway-token "$CLAWDBOT_GATEWAY_TOKEN" \
   --skip-daemon --skip-ui --skip-skills --skip-health || echo "[init] onboard had warnings, continuing..."
 
-echo "[init] remove invalid plugin configuration entirely (workaround for plugin errors)"
-"${CLI[@]}" config unset plugins || true
+echo "[init] remove invalid plugin configuration (using jq to bypass CLI validation)"
+CONFIG_FILE="/home/node/.clawdbot/moltbot.json"
+if [ -f "$CONFIG_FILE" ]; then
+  jq 'del(.plugins)' "$CONFIG_FILE" > "$CONFIG_FILE.tmp" && mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
+  echo "[init] removed plugins from config"
+else
+  echo "[init] config file not found, skipping plugin removal"
+fi
 
 echo "[init] set session dm scope"
 "${CLI[@]}" config set session.dmScope per-channel-peer
