@@ -21,7 +21,8 @@ services:
       - ${CLAWDBOT_CONFIG_DIR}:/home/node/.clawdbot
       - ${CLAWDBOT_WORKSPACE_DIR}:/home/node/clawd
       - ./init.sh:/workspace-init/init.sh:ro
-    command: ["bash", "/workspace-init/init.sh"]
+    entrypoint: []
+    command: [ "bash", "/workspace-init/init.sh" ]
     restart: "no"
 
   clawdbot:
@@ -49,7 +50,7 @@ services:
       - ${CLAWDBOT_CONFIG_DIR}:/home/node/.clawdbot
       - ${CLAWDBOT_WORKSPACE_DIR}:/home/node/clawd
     # IMPORTANT: do not publish the gateway port. Caddy is the only public entrypoint.
-    command: ["node", "dist/index.js", "gateway", "run", "--bind", "loopback", "--port", "18789", "--token", "${GATEWAY_AUTH_TOKEN}"]
+    command: [ "node", "dist/index.js", "gateway", "run", "--bind", "loopback", "--port", "18789", "--token", "${GATEWAY_AUTH_TOKEN}" ]
 
   caddy:
     image: caddy:2
