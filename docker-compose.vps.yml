@@ -1,6 +1,6 @@
 services:
   moltbot-init:
-    image: moltbot/moltbot@sha256:29600c9e2bd2ff7209f0159ce1bb035500d5f7ecc464fc6e2befb14fd0bc79fe
+    image: moltbot/moltbot:2026.1.24
     platform: linux/amd64
     container_name: clawdbot-init
     user: root
@@ -26,7 +26,7 @@ services:
     restart: "no"
 
   clawdbot:
-    image: moltbot/moltbot@sha256:29600c9e2bd2ff7209f0159ce1bb035500d5f7ecc464fc6e2befb14fd0bc79fe
+    image: moltbot/moltbot:2026.1.24
     platform: linux/amd64
     container_name: clawdbot-gateway
     working_dir: /app
