@@ -59,13 +59,13 @@ echo "[init] configure model providers"
 
 
 OPENAI_MODELS='[
-  {"id":"claude-opus-4-5","name":"Claude Opus 4.5","reasoning":false,"input":["text","image"],"cost":{"input":0,"output":0},"maxTokens":4096,"context":128000},
-  {"id":"claude-sonnet-4-5","name":"Claude Sonnet 4.5","reasoning":false,"input":["text","image"],"cost":{"input":0,"output":0},"maxTokens":4096,"context":128000}
+  {"id":"claude-opus-4-5","name":"Claude Opus 4.5"},
+  {"id":"claude-sonnet-4-5","name":"Claude Sonnet 4.5"}
 ]'
 
 ANTHROPIC_MODELS='[
-  {"id":"claude-sonnet-4-5","name":"Claude Sonnet 4.5","reasoning":false,"input":["text","image"],"cost":{"input":0,"output":0},"maxTokens":4096,"context":128000},
-  {"id":"claude-opus-4-5","name":"Claude Opus 4.5","reasoning":false,"input":["text","image"],"cost":{"input":0,"output":0},"maxTokens":4096,"context":128000}
+  {"id":"claude-sonnet-4-5","name":"Claude Sonnet 4.5"},
+  {"id":"claude-opus-4-5","name":"Claude Opus 4.5"}
 ]'
 
 # IMPORTANT: provider configs are schema-validated as a unit. Set provider objects in one go.
@@ -74,11 +74,14 @@ ANTHROPIC_MODELS='[
 if [ -n "${LITELLM_BASE_URL:-}" ] && [ -n "${LITELLM_API_KEY:-}" ]; then
   echo "[init] using LiteLLM for model providers"
 
+  # NOTE: Clawdbot's provider `apiKey` field is treated as an *auth reference* (env var name / profile),
+  # not necessarily the raw secret. So we store the env var name here, and keep the secret in container env.
   OPENAI_PROVIDER=$(cat <<JSON
 {
   "api": "openai-completions",
   "baseUrl": "${LITELLM_BASE_URL%/}/v1",
-  "apiKey": "${LITELLM_API_KEY}",
+  "auth": "api-key",
+  "apiKey": "LITELLM_API_KEY",
   "models": ${OPENAI_MODELS}
 }
 JSON
@@ -88,7 +91,8 @@ JSON
 {
   "api": "anthropic-messages",
   "baseUrl": "${LITELLM_BASE_URL%/}/anthropic",
-  "apiKey": "${LITELLM_API_KEY}",
+  "auth": "api-key",
+  "apiKey": "LITELLM_API_KEY",
   "models": ${ANTHROPIC_MODELS}
 }
 JSON
@@ -100,11 +104,13 @@ JSON
 elif [ -n "${ANTHROPIC_API_KEY:-}" ]; then
   echo "[init] using direct Anthropic API"
 
+  # NOTE: store env var name, not the raw key (the raw key stays in ANTHROPIC_API_KEY env)
   ANTHROPIC_PROVIDER=$(cat <<JSON
 {
   "api": "anthropic-messages",
   "baseUrl": "https://api.anthropic.com",
-  "apiKey": "${ANTHROPIC_API_KEY}",
+  "auth": "api-key",
+  "apiKey": "ANTHROPIC_API_KEY",
   "models": ${ANTHROPIC_MODELS}
 }
 JSON
