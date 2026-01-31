@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -u
+set -euo pipefail
 
 # Runs once to initialize config inside the persisted host mount.
 # Uses Moltbot CLI (schema-aware) instead of hand-editing JSON.
@@ -12,42 +12,17 @@ chown -R node:node /home/node/.clawdbot /home/node/clawd || true
 chmod 755 /home/node /home/node/clawd || true
 chmod -R u+rwX,go+rX /home/node/.clawdbot 2>/dev/null || true
 
-
-
 CLI=(node /app/dist/index.js)
-CONFIG_FILE="/home/node/.clawdbot/moltbot.json"
 
-# Create minimal bootstrap config if it doesn't exist
-# This avoids the onboard command which creates invalid plugin configuration
-if [ ! -f "$CONFIG_FILE" ]; then
-  echo "[init] creating minimal bootstrap config"
-  cat > "$CONFIG_FILE" << 'EOF'
-{
-  "meta": {},
-  "gateway": {
-    "port": 18789,
-    "mode": "local",
-    "bind": "lan",
-    "auth": {
-      "mode": "token",
-      "token": "PLACEHOLDER"
-    }
-  },
-  "agents": {
-    "defaults": {
-      "workspace": "/home/node/clawd"
-    }
-  }
-}
-EOF
-  
- echo "[init] bootstrap config created, now using CLI to configure"
-  
-  # Set gateway token using CLI
-  "${CLI[@]}" config set gateway.auth.token "$CLAWDBOT_GATEWAY_TOKEN" || true
-else
-  echo "[init] existing config found at $CONFIG_FILE"
-fi
+echo "[init] onboarding (non-interactive)"
+"${CLI[@]}" onboard --non-interactive --accept-risk \
+  --mode local \
+  --workspace /home/node/clawd \
+  --gateway-port 18789 \
+  --gateway-bind lan \
+  --gateway-auth token \
+  --gateway-token "$CLAWDBOT_GATEWAY_TOKEN" \
+  --skip-daemon --skip-ui --skip-skills --skip-health
 
 echo "[init] set session dm scope"
 "${CLI[@]}" config set session.dmScope per-channel-peer
