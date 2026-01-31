@@ -10,6 +10,10 @@ image             = "ubuntu-24.04"
 repo_url          = "https://github.com/jchen0824/clawdbot-docker-deploy.git"
 repo_branch       = "main"
 
+# Optional: pin to a tag or commit SHA for reproducible deployments
+# repo_ref        = "v0.1.0"
+# repo_ref        = "7296006"
+
 root_domain = "runonclawd.com"
 subdomain   = "cust-123"
 

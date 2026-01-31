@@ -35,7 +35,18 @@ runcmd:
   - chown -R 1000:1000 /root/.clawdbot /root/clawd
   - curl -fsSL https://get.docker.com | sh
   - rm -rf /opt/clawdbot-docker-deploy
-  - git clone --depth 1 --branch ${repo_branch} ${repo_url} /opt/clawdbot-docker-deploy
+  - |
+    set -euo pipefail
+    # Clone the deploy repo.
+    # If repo_ref is set (tag/commit), pin to that exact version.
+    git clone --depth 1 --branch ${repo_branch} ${repo_url} /opt/clawdbot-docker-deploy
+    cd /opt/clawdbot-docker-deploy
+    if [ -n "${repo_ref}" ]; then
+      echo "[cloud-init] pinning deploy repo to ref: ${repo_ref}"
+      # Fetch the ref and checkout detached HEAD.
+      git fetch --depth 1 origin "${repo_ref}" || git fetch --depth 1 origin "refs/tags/${repo_ref}:refs/tags/${repo_ref}"
+      git checkout --detach FETCH_HEAD
+    fi
   - cp -f /root/clawdbot.env /opt/clawdbot-docker-deploy/.env
   - |
     cat > /opt/clawdbot-docker-deploy/Caddyfile <<'EOF'

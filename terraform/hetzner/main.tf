@@ -24,6 +24,7 @@ resource "hcloud_server" "bot" {
   user_data = templatefile("${path.module}/cloud-init.yaml.tftpl", {
     repo_url            = var.repo_url
     repo_branch         = var.repo_branch
+    repo_ref            = var.repo_ref
     gateway_port        = var.gateway_port
     gateway_auth_token  = var.gateway_auth_token
     telegram_bot_token  = var.telegram_bot_token

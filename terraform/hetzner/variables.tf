@@ -76,6 +76,14 @@ variable "repo_branch" {
   default = "main"
 }
 
+# Optional pin: tag or commit SHA.
+# If set, the VPS will checkout this exact ref instead of following repo_branch.
+variable "repo_ref" {
+  type        = string
+  default     = ""
+  description = "Pinned git ref (tag or commit SHA) to deploy. Leave empty to use repo_branch."
+}
+
 variable "gateway_port" {
   type    = number
   default = 18789

@@ -32,6 +32,10 @@ terraform init
 terraform apply
 ```
 
+### Pinning the deployed version (recommended)
+In `terraform.tfvars`, set `repo_ref` to a git tag or commit SHA to make deployments reproducible.
+
+
 After apply, SSH in:
 ```bash
 ssh root@<server_ip>
