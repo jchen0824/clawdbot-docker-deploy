@@ -12,25 +12,29 @@ chown -R node:node /home/node/.clawdbot /home/node/clawd || true
 chmod 755 /home/node /home/node/clawd || true
 chmod -R u+rwX,go+rX /home/node/.clawdbot 2>/dev/null || true
 
+
 CLI=(node /app/dist/index.js)
-
-echo "[init] onboarding (non-interactive)"
-"${CLI[@]}" onboard --non-interactive --accept-risk \
-  --mode local \
-  --workspace /home/node/clawd \
-  --gateway-port 18789 \
-  --gateway-bind lan \
-  --gateway-auth token \
-  --gateway-token "$CLAWDBOT_GATEWAY_TOKEN" \
-  --skip-daemon --skip-ui --skip-skills --skip-health || echo "[init] onboard had warnings, continuing..."
-
-echo "[init] remove invalid plugin configuration (using jq to bypass CLI validation)"
 CONFIG_FILE="/home/node/.clawdbot/moltbot.json"
+
 if [ -f "$CONFIG_FILE" ]; then
-  jq 'del(.plugins)' "$CONFIG_FILE" > "$CONFIG_FILE.tmp" && mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
-  echo "[init] removed plugins from config"
+  echo "[init] existing config found, skipping onboard"
 else
-  echo "[init] config file not found, skipping plugin removal"
+  echo "[init] onboarding (non-interactive)"
+  "${CLI[@]}" onboard --non-interactive --accept-risk \
+    --mode local \
+    --workspace /home/node/clawd \
+    --gateway-port 18789 \
+    --gateway-bind lan \
+    --gateway-auth token \
+    --gateway-token "$CLAWDBOT_GATEWAY_TOKEN" \
+    --skip-daemon --skip-ui --skip-skills --skip-health || echo "[init] onboard had warnings, continuing..."
+
+  echo "[init] remove invalid plugin configuration (using python)"
+  if [ -f "$CONFIG_FILE" ]; then
+    python3 -c "import json; f=open('$CONFIG_FILE'); d=json.load(f); f.close(); d.pop('plugins', None); f=open('$CONFIG_FILE', 'w'); json.dump(d, f, indent=2); f.close(); print('[init] removed plugins from config')"
+  else
+    echo "[init] config file not found after onboard, this is unexpected"
+  fi
 fi
 
 echo "[init] set session dm scope"
