@@ -10,8 +10,15 @@ image             = "ubuntu-24.04"
 repo_url          = "https://github.com/jchen0824/clawdbot-docker-deploy.git"
 repo_branch       = "main"
 
-domain     = "cust-123.mydomain.com"
-caddy_email = "you@example.com"
+root_domain = "runonclawd.com"
+subdomain   = "cust-123"
+
+caddy_email = "ops@runonclawd.com"
+
+# Optional (recommended): enable GoDaddy DNS auto-upsert after server IP is known
+# godaddy_api_key    = "..."
+# godaddy_api_secret = "..."
+# godaddy_ttl        = 600
 
 gateway_port       = 18789
 gateway_auth_token = "$(openssl rand -hex 32)"

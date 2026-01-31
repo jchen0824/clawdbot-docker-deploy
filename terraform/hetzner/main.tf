@@ -32,7 +32,7 @@ resource "hcloud_server" "bot" {
     litellm_base_url    = var.litellm_base_url
     litellm_api_key     = var.litellm_api_key
     brave_api_key       = var.brave_api_key
-    domain              = var.domain
+    domain              = "${var.subdomain}.${var.root_domain}"
     caddy_email         = var.caddy_email
   })
 

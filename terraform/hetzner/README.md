@@ -14,6 +14,7 @@ This folder provisions a Hetzner VPS + bootstraps a **single Telegram bot** runn
 - Runs `docker compose -f docker-compose.vps.yml up -d`
 - Exposes the Control UI via **HTTPS only** using Caddy + Let's Encrypt
 - Inbound firewall allows **80/443 only** (no SSH)
+- (Optional) Automatically upserts GoDaddy DNS A record once the server IP is known
 
 ## Prereqs
 

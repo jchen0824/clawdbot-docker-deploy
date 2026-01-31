@@ -28,14 +28,42 @@ variable "location" {
   default = "sgp1"
 }
 
-variable "domain" {
+# Hostname
+# We keep this split for GoDaddy automation.
+variable "root_domain" {
   type        = string
-  description = "Public hostname for this bot, e.g. cust-123.mydomain.com"
+  description = "Apex domain (GoDaddy), e.g. runonclawd.com"
+}
+
+variable "subdomain" {
+  type        = string
+  description = "Subdomain label, e.g. cust-123"
 }
 
 variable "caddy_email" {
   type        = string
   description = "Email for Let's Encrypt (Caddy)."
+}
+
+# GoDaddy DNS automation (optional but recommended)
+variable "godaddy_api_key" {
+  type        = string
+  sensitive   = true
+  default     = ""
+  description = "GoDaddy API key (if set, Terraform will upsert the A record automatically)."
+}
+
+variable "godaddy_api_secret" {
+  type        = string
+  sensitive   = true
+  default     = ""
+  description = "GoDaddy API secret (if set, Terraform will upsert the A record automatically)."
+}
+
+variable "godaddy_ttl" {
+  type        = number
+  default     = 600
+  description = "GoDaddy DNS TTL seconds"
 }
 
 variable "repo_url" {
