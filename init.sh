@@ -22,8 +22,10 @@ echo "[init] onboarding (non-interactive)"
   --gateway-bind lan \
   --gateway-auth token \
   --gateway-token "$CLAWDBOT_GATEWAY_TOKEN" \
-  --skip-daemon --skip-ui --skip-skills --skip-health --skip-plugins
+  --skip-daemon --skip-ui --skip-skills --skip-health || echo "[init] onboard had warnings, continuing..."
 
+echo "[init] run doctor --fix to resolve any configuration issues"
+"${CLI[@]}" doctor --fix || true
 
 echo "[init] set session dm scope"
 "${CLI[@]}" config set session.dmScope per-channel-peer
