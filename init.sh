@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eu
+set -u
 
 # Runs once to initialize config inside the persisted host mount.
 # Uses Moltbot CLI (schema-aware) instead of hand-editing JSON.
