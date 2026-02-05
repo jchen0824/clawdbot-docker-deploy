@@ -65,7 +65,8 @@ OPENAI_MODELS='[
 
 ANTHROPIC_MODELS='[
   {"id":"claude-sonnet-4-5","name":"Claude Sonnet 4.5","reasoning":false,"input":["text","image"],"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0},"maxTokens":4096,"contextWindow":128000},
-  {"id":"claude-opus-4-5","name":"Claude Opus 4.5","reasoning":false,"input":["text","image"],"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0},"maxTokens":4096,"contextWindow":128000}
+  {"id":"claude-opus-4-5","name":"Claude Opus 4.5","reasoning":false,"input":["text","image"],"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0},"maxTokens":4096,"contextWindow":128000},
+  {"id":"claude-haiku-4-5","name":"Claude Haiku 4.5","reasoning":false,"input":["text","image"],"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0},"maxTokens":4096,"contextWindow":128000}
 ]'
 
 # IMPORTANT: provider configs are schema-validated as a unit. Set provider objects in one go.

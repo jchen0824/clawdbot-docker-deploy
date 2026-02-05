@@ -36,6 +36,7 @@ runcmd:
   - curl -fsSL https://get.docker.com | sh
   - rm -rf /opt/clawdbot-docker-deploy
   - |
+    /bin/bash <<'EOF'
     set -euo pipefail
     # Clone the deploy repo.
     # If repo_ref is set (tag/commit), pin to that exact version.
@@ -47,6 +48,8 @@ runcmd:
       git fetch --depth 1 origin "${repo_ref}" || git fetch --depth 1 origin "refs/tags/${repo_ref}:refs/tags/${repo_ref}"
       git checkout --detach FETCH_HEAD
     fi
+    EOF
+
   - cp -f /root/clawdbot.env /opt/clawdbot-docker-deploy/.env
   - |
     cat > /opt/clawdbot-docker-deploy/Caddyfile <<'EOF'
