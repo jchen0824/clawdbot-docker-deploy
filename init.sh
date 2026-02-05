@@ -59,13 +59,13 @@ echo "[init] configure model providers"
 
 
 OPENAI_MODELS='[
-  {"id":"claude-opus-4-5","name":"Claude Opus 4.5","reasoning":false,"input":["text","image"],"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0},"maxTokens":4096,"context":128000},
-  {"id":"claude-sonnet-4-5","name":"Claude Sonnet 4.5","reasoning":false,"input":["text","image"],"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0},"maxTokens":4096,"context":128000}
+  {"id":"claude-opus-4-5","name":"Claude Opus 4.5","reasoning":false,"input":["text","image"],"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0},"maxTokens":4096,"contextWindow":128000},
+  {"id":"claude-sonnet-4-5","name":"Claude Sonnet 4.5","reasoning":false,"input":["text","image"],"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0},"maxTokens":4096,"contextWindow":128000}
 ]'
 
 ANTHROPIC_MODELS='[
-  {"id":"claude-sonnet-4-5","name":"Claude Sonnet 4.5","reasoning":false,"input":["text","image"],"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0},"maxTokens":4096,"context":128000},
-  {"id":"claude-opus-4-5","name":"Claude Opus 4.5","reasoning":false,"input":["text","image"],"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0},"maxTokens":4096,"context":128000}
+  {"id":"claude-sonnet-4-5","name":"Claude Sonnet 4.5","reasoning":false,"input":["text","image"],"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0},"maxTokens":4096,"contextWindow":128000},
+  {"id":"claude-opus-4-5","name":"Claude Opus 4.5","reasoning":false,"input":["text","image"],"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0},"maxTokens":4096,"contextWindow":128000}
 ]'
 
 # IMPORTANT: provider configs are schema-validated as a unit. Set provider objects in one go.
@@ -101,8 +101,48 @@ JSON
   "${CLI[@]}" config set --json models.providers.openai "$OPENAI_PROVIDER"
   "${CLI[@]}" config set --json models.providers.anthropic "$ANTHROPIC_PROVIDER"
 
+elif [ -n "${ANTHROPIC_SETUP_TOKEN:-}" ]; then
+  echo "[init] using Anthropic token auth (setup-token)"
+
+  # Create auth profiles directory
+  mkdir -p /home/node/.clawdbot/agents/main/agent
+
+  # Directly write the auth profile JSON (correct structure for token auth)
+  cat > /home/node/.clawdbot/agents/main/agent/auth-profiles.json <<AUTHEOF
+{
+  "version": 1,
+  "profiles": {
+    "anthropic:default": {
+      "type": "token",
+      "provider": "anthropic",
+      "token": "${ANTHROPIC_SETUP_TOKEN}"
+    }
+  }
+}
+AUTHEOF
+
+  # Set correct permissions
+  chown -R node:node /home/node/.clawdbot/agents/main/agent
+  chmod 600 /home/node/.clawdbot/agents/main/agent/auth-profiles.json
+
+  # Configure auth profiles in main config (declares the profile)
+  "${CLI[@]}" config set --json auth.profiles '{"anthropic:default":{"provider":"anthropic","mode":"token"}}'
+
+  # Then configure the provider - no profile/apiKey needed, uses the auth profile
+  ANTHROPIC_PROVIDER=$(cat <<JSON
+{
+  "api": "anthropic-messages",
+  "baseUrl": "https://api.anthropic.com",
+  "auth": "token",
+  "models": ${ANTHROPIC_MODELS}
+}
+JSON
+)
+
+  "${CLI[@]}" config set --json models.providers.anthropic "$ANTHROPIC_PROVIDER"
+
 elif [ -n "${ANTHROPIC_API_KEY:-}" ]; then
-  echo "[init] using direct Anthropic API"
+  echo "[init] using direct Anthropic API key"
 
   # NOTE: store env var name, not the raw key (the raw key stays in ANTHROPIC_API_KEY env)
   ANTHROPIC_PROVIDER=$(cat <<JSON
@@ -119,7 +159,10 @@ JSON
   "${CLI[@]}" config set --json models.providers.anthropic "$ANTHROPIC_PROVIDER"
 
 else
-  echo "[init] ERROR: No model provider configured. Set ANTHROPIC_API_KEY (recommended) or LITELLM_BASE_URL+LITELLM_API_KEY." >&2
+  echo "[init] ERROR: No model provider configured. Set one of:" >&2
+  echo "  - ANTHROPIC_API_KEY (direct API key auth)" >&2
+  echo "  - ANTHROPIC_SETUP_TOKEN (token auth via Claude subscription)" >&2
+  echo "  - LITELLM_BASE_URL + LITELLM_API_KEY (LiteLLM proxy)" >&2
   exit 1
 fi
 
